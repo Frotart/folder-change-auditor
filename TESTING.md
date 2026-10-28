@@ -30,7 +30,7 @@ package, installs the wheel and runs the `folder-audit` command.
 | 26 Oct 2026 | GitHub Actions, Windows, CPython 3.12.10 and 3.13.16 | 71 tests, all passed; demo passed |
 | 26 Oct 2026 | Linux, CPython 3.13.5 (local) | 71 tests, 64 passed, 7 skipped; demo passed |
 | 26 Oct 2026 | Windows, CPython 3.12.14 (local) | 71 tests, 67 passed, 4 skipped (real symlink tests; no symlink privilege) |
-| 28 Oct 2026 | Linux, CPython 3.13.18 (local) | 71 tests, 64 passed, 7 skipped; demo and installed `folder-audit` command passed |
+| 28 Oct 2026 | Linux, CPython 3.13.18 (local) | 72 tests, 65 passed, 7 skipped; demo and installed `folder-audit` command passed |
 
 On Linux and macOS the 7 skips are Windows-only junction and file-locking
 integration tests. On GitHub's Windows runners the symlink tests run because the
