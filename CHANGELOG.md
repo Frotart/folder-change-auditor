@@ -25,9 +25,16 @@ First public release.
 - Python API: `snapshot_folder`, `save_snapshot`, `load_snapshot`,
   `compare_snapshots` and `AuditError`.
 - `folder-audit` console command via `pyproject.toml`.
-- Synthetic end-to-end demo and a 71-test suite.
+- Synthetic end-to-end demo and a 72-test suite.
 - CI on Windows, Linux and macOS with Python 3.12–3.14, plus a package install
   check; a release workflow that publishes `SHA256SUMS.txt` with each release.
+
+### Fixed
+- Files added to a folder during a scan are now detected on every platform. The
+  scan re-lists each directory at the end instead of relying only on directory
+  timestamps, which did not change reliably on Windows with Python 3.14.
+- Tests and the demo use real (symlink-free) temporary paths, so they pass on
+  macOS, where `/var` is a symlink to `/private/var`.
 
 [Unreleased]: https://github.com/Frotart/folder-change-auditor/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/Frotart/folder-change-auditor/releases/tag/v0.1.0

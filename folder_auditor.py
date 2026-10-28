@@ -143,7 +143,7 @@ def _validate_manifest(manifest):
 def snapshot_folder(folder):
     """Return (absolute_root, version_1_manifest); fail on unreadable entries."""
     root = _absolute(folder)
-    files, skipped, directories, observed = {}, [], {}, {}
+    files, skipped, directories, observed, listings = {}, [], {}, {}, {}
     try:
         _plain_directory(root)
         stack = [(root, "", root.lstat())]
@@ -165,6 +165,7 @@ def snapshot_folder(folder):
                     if entries_seen > MAX_ENTRIES:
                         raise AuditError("Source has too many entries")
                     entries.append(entry.name)
+            listings[directory] = frozenset(entries)
             for name in sorted(entries):
                 rel = f"{relative}/{name}" if relative else name
                 _valid_name(rel)
@@ -187,6 +188,13 @@ def snapshot_folder(folder):
         for path, expected in {**observed, **directories}.items():
             if _signature(expected) != _signature(path.lstat()):
                 raise AuditError(f"Entry changed while scanning: {ascii(str(path))}")
+        # Directory timestamps are not a reliable addition/removal signal on
+        # every platform (e.g. Windows with Python 3.14), so also re-list names.
+        for directory, names in listings.items():
+            with os.scandir(directory) as iterator:
+                if frozenset(entry.name for entry in iterator) != names:
+                    raise AuditError(f"Directory contents changed while scanning: "
+                                     f"{ascii(str(directory))}")
         _plain_directory(root)
     except (OSError, ValueError, RuntimeError) as exc:
         raise AuditError(f"Cannot scan source: {ascii(str(exc))}") from exc

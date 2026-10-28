@@ -36,8 +36,13 @@ On Linux and macOS the 7 skips are Windows-only junction and file-locking
 integration tests. On GitHub's Windows runners the symlink tests run because the
 runner account has symlink privilege, so nothing is skipped there.
 
-macOS and Python 3.14 were added to the matrix for the 0.1.0 release; their
-results are in the Actions history for that release.
+macOS and Python 3.14 were added to the matrix for the 0.1.0 release. Their
+first runs (28 Oct 2026) found two problems, both fixed before release: the test
+fixtures used macOS's symlinked `/var` temp path, and on Windows with Python 3.14
+a file added during a scan was not detected because directory timestamps did not
+change. Scans now re-list each directory at the end; a regression test simulates
+the missing timestamp signal on every platform. The suite has 72 tests from this
+release on; results for the full matrix are in the Actions history.
 
 ## Coverage and known limitations
 

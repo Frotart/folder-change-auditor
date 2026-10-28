@@ -475,6 +475,22 @@ class RobustnessTests(FixtureHelpers, unittest.TestCase):
             with self.assertRaises(AuditError):
                 snapshot_folder(self.source)
 
+    def test_addition_detected_without_timestamp_signal(self):
+        # Simulate platforms where directory timestamps don't reflect an added
+        # entry (seen on Windows with Python 3.14): only re-listing detects it.
+        (self.source / "first").touch()
+        original = auditor.hash_file
+
+        def add(p):
+            result = original(p)
+            (self.source / "added-late").touch()
+            return result
+
+        with mock.patch.object(auditor, "_signature", side_effect=auditor._identity), \
+                mock.patch.object(auditor, "hash_file", side_effect=add):
+            with self.assertRaises(AuditError):
+                snapshot_folder(self.source)
+
     def test_earlier_file_changed_while_later_file_scans(self):
         first, last = self.source / "a", self.source / "z"
         first.write_bytes(b"old")
