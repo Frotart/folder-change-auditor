@@ -76,7 +76,9 @@ temporary folder. Expected diff:
 - The output's parent folder must already exist, and snapshots should be kept
   **outside** the scanned folder.
 - Source and output paths must have no symlink or Windows reparse-point
-  components, including junctions. Use their actual paths.
+  components, including junctions. Use their actual paths. On macOS, `/tmp`,
+  `/var` and `/etc` are symlinks into `/private`, so use `/private/tmp` and so
+  on; folders under `/Users` are fine as they are.
 - Output requires a filesystem that supports hard links (tested on NTFS and
   local Linux filesystems).
 

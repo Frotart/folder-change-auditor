@@ -26,7 +26,9 @@ class FolderAuditorTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.base = Path(self.temp.name)
+        # Resolve so platforms whose temp dir sits behind a symlink (macOS /var)
+        # use the real path, which the auditor requires by design.
+        self.base = Path(self.temp.name).resolve()
         self.source = self.base / "source"
         self.source.mkdir()
 

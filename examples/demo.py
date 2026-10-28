@@ -11,7 +11,7 @@ from pathlib import Path
 def main():
     auditor = Path(__file__).resolve().parents[1] / "folder_auditor.py"
     with tempfile.TemporaryDirectory(prefix="folder-auditor-example-") as name:
-        base = Path(name)
+        base = Path(name).resolve()  # real path, e.g. /private/var on macOS
         source = base / "source"
         source.mkdir()
         (source / "changed.txt").write_text("old\n", encoding="utf-8")
