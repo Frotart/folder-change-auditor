@@ -1,0 +1,53 @@
+name: Release
+
+# Runs when a version tag such as v0.1.0 is pushed. Builds the package,
+# writes SHA256SUMS.txt for every release asset, and publishes a GitHub Release.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Check tag matches package version
+        run: |
+          version=$(python -c "import folder_auditor; print(folder_auditor.__version__)")
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "Tag $GITHUB_REF_NAME does not match version $version"; exit 1; }
+      - name: Run tests before releasing
+        run: python -m unittest test_folder_auditor
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+      - name: Write checksums
+        run: |
+          cp folder_auditor.py dist/
+          cd dist && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
+      - name: Extract release notes from CHANGELOG
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '
+            $0 ~ "^## \\[" v "\\]" {found=1; next}
+            found && /^## \[/ {exit}
+            found {print}
+          ' CHANGELOG.md > release-notes.md
+          test -s release-notes.md || echo "See CHANGELOG.md." > release-notes.md
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "Folder Change Auditor $GITHUB_REF_NAME" \
+            --notes-file release-notes.md
