@@ -1,11 +1,14 @@
 name: Release
 
-# Runs when a version tag such as v0.1.0 is pushed. Builds the package,
-# writes SHA256SUMS.txt for every release asset, and publishes a GitHub Release.
+# Publishes a GitHub Release with the built package and SHA256SUMS.txt.
+# Start it either by pushing a version tag such as v0.1.0, or manually from the
+# Actions tab ("Run workflow" on main), which tags the current commit as
+# v<__version__> and releases it.
 
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,10 +24,21 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: '3.13'
-      - name: Check tag matches package version
+      - name: Work out the release tag
         run: |
           version=$(python -c "import folder_auditor; print(folder_auditor.__version__)")
-          test "v$version" = "$GITHUB_REF_NAME" || { echo "Tag $GITHUB_REF_NAME does not match version $version"; exit 1; }
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            tag="$GITHUB_REF_NAME"
+            test "v$version" = "$tag" || { echo "Tag $tag does not match version $version"; exit 1; }
+          else
+            test "$GITHUB_REF_NAME" = "main" || { echo "Manual releases run from main only"; exit 1; }
+            tag="v$version"
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+              echo "Tag $tag already exists; bump __version__ before releasing again"; exit 1
+            fi
+          fi
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+          echo "VERSION=$version" >> "$GITHUB_ENV"
       - name: Run tests before releasing
         run: python -m unittest test_folder_auditor
       - name: Build sdist and wheel
@@ -37,8 +51,7 @@ jobs:
           cd dist && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
       - name: Extract release notes from CHANGELOG
         run: |
-          version="${GITHUB_REF_NAME#v}"
-          awk -v v="$version" '
+          awk -v v="$VERSION" '
             $0 ~ "^## \\[" v "\\]" {found=1; next}
             found && /^## \[/ {exit}
             found {print}
@@ -48,6 +61,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/* \
-            --title "Folder Change Auditor $GITHUB_REF_NAME" \
+          gh release create "$TAG" dist/* \
+            --target "$GITHUB_SHA" \
+            --title "Folder Change Auditor $TAG" \
             --notes-file release-notes.md
