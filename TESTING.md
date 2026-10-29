@@ -14,22 +14,35 @@ python examples/demo.py
 The comparison command returns exit code `1` when changes exist, by design;
 `examples/demo.py` verifies this rather than treating it as a failure.
 
-## Observed results (26 October 2026)
+## Continuous integration
 
-| Environment | Outcome | Important qualification |
+Every push to `main` and every pull request runs
+[the Tests workflow](https://github.com/Frotart/folder-change-auditor/actions/workflows/ci.yml):
+the unit and integration suite plus the end-to-end demo on Windows, Ubuntu and
+macOS with Python 3.12, 3.13 and 3.14, and a separate job that builds the
+package, installs the wheel and runs the `folder-audit` command.
+
+## Observed results
+
+| Date | Environment | Outcome |
 | --- | --- | --- |
-| Windows, CPython 3.12.14 | 71 tests, 67 passed, 4 skipped, 0 failures/errors | Results reported in the preceding private development verification; four real symlink tests were skipped due to unavailable symlink privileges. |
-| Linux, CPython 3.13.5 | 71 tests, 64 passed, 7 skipped, 0 failures/errors | Independently re-executed; skipped tests are Windows junction/locking integrations. |
+| 26 Oct 2026 | GitHub Actions, Ubuntu, CPython 3.12.15 and 3.13.16 | 71 tests, 64 passed, 7 skipped; demo passed |
+| 26 Oct 2026 | GitHub Actions, Windows, CPython 3.12.10 and 3.13.16 | 71 tests, all passed; demo passed |
+| 26 Oct 2026 | Linux, CPython 3.13.5 (local) | 71 tests, 64 passed, 7 skipped; demo passed |
+| 26 Oct 2026 | Windows, CPython 3.12.14 (local) | 71 tests, 67 passed, 4 skipped (real symlink tests; no symlink privilege) |
+| 28 Oct 2026 | Linux, CPython 3.13.18 (local) | 72 tests, 65 passed, 7 skipped; demo and installed `folder-audit` command passed |
 
-The Linux synthetic end-to-end demonstration also passed and returned the
-expected added/removed/modified results. The code in this candidate was not
-changed from the tested implementation. The Windows results have not been
-reproduced on a Windows machine during candidate packaging.
+On Linux and macOS the 7 skips are Windows-only junction and file-locking
+integration tests. On GitHub's Windows runners the symlink tests run because the
+runner account has symlink privilege, so nothing is skipped there.
 
-A GitHub Actions workflow is included for Python 3.12 and 3.13 on Windows and
-Ubuntu. **That workflow has not run on GitHub yet.** CI results must be reviewed
-before tagging a public release. macOS, network drives, and hostile/racing file
-systems are not verified by these runs.
+macOS and Python 3.14 were added to the matrix for the 0.1.0 release. Their
+first runs (28 Oct 2026) found two problems, both fixed before release: the test
+fixtures used macOS's symlinked `/var` temp path, and on Windows with Python 3.14
+a file added during a scan was not detected because directory timestamps did not
+change. Scans now re-list each directory at the end; a regression test simulates
+the missing timestamp signal on every platform. The suite has 72 tests from this
+release on; results for the full matrix are in the Actions history.
 
 ## Coverage and known limitations
 
@@ -38,8 +51,9 @@ relative paths, symlink/junction policies, concurrent changes, write errors,
 exclusive snapshot publication, and CLI exit codes. Platform-specific tests are
 skipped where not applicable or supported.
 
-The scan is not atomic and is not designed for adversarial filesystems or
-forensic chain-of-custody use. Reads may update access times. Skipped entries,
+Network drives and hostile/racing file systems are not verified. The scan is not
+atomic and is not designed for adversarial filesystems or forensic
+chain-of-custody use. Reads may update access times. Skipped entries,
 metadata-only changes, alternate data streams, ACLs, and empty directories are
 outside content comparison. Keep JSON snapshots private when relative paths,
 file sizes, and hashes may reveal information.

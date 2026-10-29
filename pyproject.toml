@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "folder-change-auditor"
+dynamic = ["version"]
+description = "Offline folder change detection using SHA-256 snapshots and safe comparisons."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Frotart" }]
+keywords = ["sha256", "file-integrity", "backup-verification", "snapshot", "diff", "cli", "offline"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: System Administrators",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: System :: Archiving :: Backup",
+    "Topic :: System :: Filesystems",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/Frotart/folder-change-auditor"
+Changelog = "https://github.com/Frotart/folder-change-auditor/blob/main/CHANGELOG.md"
+Issues = "https://github.com/Frotart/folder-change-auditor/issues"
+
+[project.scripts]
+folder-audit = "folder_auditor:main"
+
+[tool.setuptools]
+py-modules = ["folder_auditor"]
+
+[tool.setuptools.dynamic]
+version = { attr = "folder_auditor.__version__" }

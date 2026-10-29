@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="430" viewBox="0 0 880 430" role="img" aria-label="Terminal demo: two folder-audit snapshots of a photos folder, then a comparison reporting one added, one removed and one modified file, exit code 1.">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0a1119"/><stop offset="1" stop-color="#101b24"/></linearGradient>
+</defs>
+<rect x="0.5" y="0.5" width="879" height="429" rx="12" fill="url(#bg)" stroke="#9cccf1" stroke-opacity=".18"/>
+<path d="M1 44H879" stroke="#9cccf1" stroke-opacity=".12"/>
+<circle cx="26" cy="22" r="6" fill="#258de0" fill-opacity=".9"/>
+<circle cx="46" cy="22" r="6" fill="#258de0" fill-opacity=".5"/>
+<circle cx="66" cy="22" r="6" fill="#258de0" fill-opacity=".25"/>
+<text x="440" y="27" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#8eaabe" letter-spacing=".6">folder-audit</text>
+<g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="15.5" xml:space="preserve">
+<text x="28" y="80"><tspan fill="#258de0">$</tspan><tspan fill="#e8f3fb"> folder-audit snapshot photos --out before.json</tspan></text>
+<text x="28" y="104" fill="#8eaabe">Recorded 3 files; skipped 0 entries.</text>
+<text x="28" y="136" fill="#5d7487"># edit notes.txt, delete old-draft.docx, add sunset.jpg</text>
+<text x="28" y="168"><tspan fill="#258de0">$</tspan><tspan fill="#e8f3fb"> folder-audit snapshot photos --out after.json</tspan></text>
+<text x="28" y="192" fill="#8eaabe">Recorded 3 files; skipped 0 entries.</text>
+<text x="28" y="232"><tspan fill="#258de0">$</tspan><tspan fill="#e8f3fb"> folder-audit compare before.json after.json</tspan></text>
+<text x="28" y="258" fill="#7ee0a1">Added: 1</text>
+<text x="28" y="281" fill="#bfdaed">  'sunset.jpg'</text>
+<text x="28" y="306" fill="#ff8b8b">Removed: 1</text>
+<text x="28" y="329" fill="#bfdaed">  'old-draft.docx'</text>
+<text x="28" y="354" fill="#ffd27a">Modified: 1</text>
+<text x="28" y="377" fill="#bfdaed">  'notes.txt'</text>
+<text x="28" y="408"><tspan fill="#258de0">$</tspan><tspan fill="#e8f3fb"> echo $?</tspan><tspan fill="#5d7487">   # 1 = differences found</tspan></text>
+</g>
+</svg>

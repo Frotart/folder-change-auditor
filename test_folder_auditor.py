@@ -26,7 +26,9 @@ class FolderAuditorTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.base = Path(self.temp.name)
+        # Resolve so platforms whose temp dir sits behind a symlink (macOS /var)
+        # use the real path, which the auditor requires by design.
+        self.base = Path(self.temp.name).resolve()
         self.source = self.base / "source"
         self.source.mkdir()
 
@@ -470,6 +472,22 @@ class RobustnessTests(FixtureHelpers, unittest.TestCase):
             return result
 
         with mock.patch.object(auditor, "hash_file", side_effect=add):
+            with self.assertRaises(AuditError):
+                snapshot_folder(self.source)
+
+    def test_addition_detected_without_timestamp_signal(self):
+        # Simulate platforms where directory timestamps don't reflect an added
+        # entry (seen on Windows with Python 3.14): only re-listing detects it.
+        (self.source / "first").touch()
+        original = auditor.hash_file
+
+        def add(p):
+            result = original(p)
+            (self.source / "added-late").touch()
+            return result
+
+        with mock.patch.object(auditor, "_signature", side_effect=auditor._identity), \
+                mock.patch.object(auditor, "hash_file", side_effect=add):
             with self.assertRaises(AuditError):
                 snapshot_folder(self.source)
 
