@@ -226,9 +226,10 @@ when the account lacks permission; they do not change Windows settings or reques
 additional privileges. CI runs the suite on Windows, Linux and macOS with
 Python 3.12–3.14; see [TESTING.md](TESTING.md) for results and coverage.
 
-Releases are cut by pushing a `vX.Y.Z` tag that matches `__version__`. The
-release workflow re-runs the tests, builds the package, and publishes it with a
-`SHA256SUMS.txt` for every asset.
+Releases are cut by pushing a `vX.Y.Z` tag that matches `__version__`, or by
+running the Release workflow manually on `main`, which tags the current commit.
+Either way the workflow re-runs the tests, builds the package, and publishes it
+with a `SHA256SUMS.txt` for every asset.
 
 ## Project files
 
